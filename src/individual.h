@@ -16,7 +16,7 @@ class Individual {
   static const int MIN_MOMENTUM = 1000;
   static const int MAX_MOMENTUM = 7000;
 
-  std::bitset<N_BITS> get_vector() {
+  std::bitset<N_BITS> get_vector() const {
     return bit_vector;
   }
 
@@ -42,6 +42,10 @@ class Individual {
     return to_value(MOMENTUM_START, MOMENTUM_END) + MIN_MOMENTUM;
   }
 
+  Individual(const Individual &other) {
+    bit_vector = std::bitset<N_BITS>(other.get_vector().to_ullong());
+  }
+  
  private:
   std::bitset<N_BITS> bit_vector;
   static const int HIDDEN_LAYERS_START = 0;
