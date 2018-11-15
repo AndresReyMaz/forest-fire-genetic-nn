@@ -50,3 +50,17 @@ void Individual::set_neurons(const std::vector<int>& layers) {
     set_neurons_for_layer(i, layers[i]);
   }
 }
+
+void Individual::mutate() {
+  assert(is_valid_individual());
+  while (true) {
+    int random_bit = get_random(0, MOMENTUM_END);
+    bit_vector[random_bit] = !bit_vector[random_bit];
+    if (is_valid_individual()) {
+      return;
+    } else {
+      // Not valid individual; undo mutation and try again.
+      bit_vector[random_bit] = !bit_vector[random_bit];
+    }
+  }
+}

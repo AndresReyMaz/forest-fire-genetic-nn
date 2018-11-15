@@ -117,6 +117,9 @@ class Individual {
     return true;
   }
 
+  // Mutates the individual by one bit to a valid representation.
+  void mutate();
+  
   Individual() { };
   
   Individual(const Individual &other) {
