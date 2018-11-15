@@ -3,6 +3,8 @@
 
 #include <assert.h>
 #include <bitset>
+#include <random>
+#include <utility>
 
 const int N_BITS = 57;
 
@@ -12,8 +14,8 @@ class Individual {
   static const int MAX_HIDDEN_LAYERS = 3;
   static const int MIN_NUMBER_NEURONS = 3;
   static const int MAX_NUMBER_NEURONS = 100;
-  static const int MIN_TRAINING_TIME = 100;
-  static const int MAX_TRAINING_TIME = 4000;
+  static const int MIN_TRAINING_TIME = 0;
+  static const int MAX_TRAINING_TIME = 195;
   static const int MIN_LEARNING_RATE = 1000;
   static const int MAX_LEARNING_RATE = 6000;
   static const int MIN_MOMENTUM = 1000;
@@ -49,12 +51,31 @@ class Individual {
     // Note: this gets all the neuron information as a non-normalized number.
     return to_value(HIDDEN_LAYERS_START, NUMBER_NEURONS_END);
   }
+
+  std::pair<int, int> get_training_time_crossover_point() {
+    return {get_random(TRAINING_TIME_START + 1, TRAINING_TIME_END), TRAINING_TIME_END};
+  }
+
+  std::pair<int, int> get_learning_rate_crossover_point() {
+    return {get_random(LEARNING_RATE_START + 1, LEARNING_RATE_END), LEARNING_RATE_END};
+  }
+
+  std::pair<int, int> get_momentum_crossover_point() {
+    return {get_random(MOMENTUM_START + 1, MOMENTUM_END), MOMENTUM_END};
+  }
   
   void set_training_time(int training_time);
   void set_learning_rate(int learning_rate);
   void set_momentum(int momentum);
   void set_neurons(int value) {
     set_value(HIDDEN_LAYERS_START, NUMBER_NEURONS_END, value);
+  }
+
+  void copy_bits_from(const Individual& other, const std::pair<int, int>& range) {
+    // Copies the bits in the range from other to this.
+    for (int i = range.first; i <= range.second; ++i) {
+      bit_vector[i] = other.get_vector()[i];
+    }
   }
 
   Individual() { };
@@ -65,6 +86,7 @@ class Individual {
   
  private:
   std::bitset<N_BITS> bit_vector;
+  std::default_random_engine eng {std::random_device{}()};
   static const int HIDDEN_LAYERS_START = 0;
   static const int HIDDEN_LAYERS_END = HIDDEN_LAYERS_START + 1;
   static const int NUMBER_NEURONS_START = HIDDEN_LAYERS_END + 1;
@@ -83,6 +105,12 @@ class Individual {
   int to_value(int start, int end) const;
 
   void set_value(int start, int end, int value);
+
+  int get_random(int lo, int hi) {
+    // Gets a random value between lo and hi, inclusive.
+    std::uniform_int_distribution<> dist {lo, hi};
+    return dist(eng);
+  }
 };
 
 #endif
