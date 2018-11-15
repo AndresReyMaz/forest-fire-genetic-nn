@@ -67,9 +67,17 @@ class Individual {
   void set_training_time(int training_time);
   void set_learning_rate(int learning_rate);
   void set_momentum(int momentum);
+  void set_number_of_layers(int number_of_layers);
   void set_neurons(int value) {
     set_value(HIDDEN_LAYERS_START, NUMBER_NEURONS_END, value);
   }
+  void set_neurons_for_layer(int layer, int value);
+
+  // Sets the 0-indexed layer to value.
+  void set_hidden_layer(int layer, int value);
+  
+  // Sets the number of hidden layers to the length of the list and the values to those selected.
+  void set_neurons(const std::vector<int>& neurons);
 
   void copy_bits_from(const Individual& other, const std::pair<int, int>& range) {
     // Copies the bits in the range from other to this.
@@ -78,15 +86,42 @@ class Individual {
     }
   }
 
+  void copy_bits_from(const Individual& other, const std::pair<int, int>& this_range, const std::pair<int, int>& other_range) {
+    // Copies the bits in other defined by other_range to this, in the range defined by this_range.
+    assert(this_range.second - this_range.first == other_range.second - other_range.first);
+    for (int i = this_range.first, j = other_range.first; i < this_range.second; ++i, ++j) {
+      bit_vector[i] = other.get_vector()[j];
+    }
+  }
+
+  bool is_valid_individual() {
+    // Checks if the individual has valid values for all parameters.
+    for (int i = 1; i <= 3; ++i) {
+      int number_of_neurons = get_neurons_for_layer(i);
+      if (number_of_neurons < MIN_NUMBER_NEURONS or number_of_neurons > MAX_NUMBER_NEURONS) {
+	return false;
+      }
+    }
+    int training_time = get_training_time();
+    if (training_time < MIN_TRAINING_TIME or training_time > MAX_TRAINING_TIME) {
+      return false;
+    }
+    int learning_rate = get_learning_rate();
+    if (learning_rate < MIN_LEARNING_RATE or learning_rate > MAX_LEARNING_RATE) {
+      return false;
+    }
+    int momentum = get_momentum();
+    if (momentum < MIN_MOMENTUM or momentum > MAX_MOMENTUM) {
+      return false;
+    }
+    return true;
+  }
+
   Individual() { };
   
   Individual(const Individual &other) {
     bit_vector = std::bitset<N_BITS>(other.get_vector().to_ullong());
   }
-  
- private:
-  std::bitset<N_BITS> bit_vector;
-  std::default_random_engine eng {std::random_device{}()};
   static const int HIDDEN_LAYERS_START = 0;
   static const int HIDDEN_LAYERS_END = HIDDEN_LAYERS_START + 1;
   static const int NUMBER_NEURONS_START = HIDDEN_LAYERS_END + 1;
@@ -101,6 +136,10 @@ class Individual {
   static const int MOMENTUM_START = LEARNING_RATE_END + 1;
   static const int MOMENTUM_LENGTH = 13;
   static const int MOMENTUM_END = MOMENTUM_START + MOMENTUM_LENGTH - 1;
+  
+ private:
+  std::bitset<N_BITS> bit_vector;
+  std::default_random_engine eng {std::random_device{}()};
 
   int to_value(int start, int end) const;
 
@@ -111,6 +150,7 @@ class Individual {
     std::uniform_int_distribution<> dist {lo, hi};
     return dist(eng);
   }
+
 };
 
 #endif
