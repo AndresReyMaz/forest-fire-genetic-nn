@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "individual.h"
+#include "random_util.h"
 
 const int Individual::MOMENTUM_END; // circumvents strange linker error
 
@@ -70,14 +71,14 @@ void Individual::mutate() {
 
 Individual Individual::generate_random_individual() {
   Individual individual = Individual();
-  int number_of_hidden_layers = Individual::get_random(Individual::MIN_HIDDEN_LAYERS, Individual::MAX_HIDDEN_LAYERS);
+  int number_of_hidden_layers = get_random(Individual::MIN_HIDDEN_LAYERS, Individual::MAX_HIDDEN_LAYERS);
   individual.set_number_of_layers(number_of_hidden_layers);
   for (int i = 1; i <= number_of_hidden_layers; ++i) {
-    individual.set_neurons_for_layer(i, Individual::get_random(Individual::MIN_NUMBER_NEURONS, Individual::MAX_NUMBER_NEURONS));
+    individual.set_neurons_for_layer(i, get_random(Individual::MIN_NUMBER_NEURONS, Individual::MAX_NUMBER_NEURONS));
   }
-  individual.set_training_time(Individual::get_random(Individual::MIN_TRAINING_TIME, Individual::MAX_TRAINING_TIME));
-  individual.set_learning_rate(Individual::get_random(Individual::MIN_LEARNING_RATE, Individual::MAX_LEARNING_RATE));
-  individual.set_momentum(Individual::get_random(Individual::MIN_MOMENTUM, Individual::MAX_MOMENTUM));
+  individual.set_training_time(get_random(Individual::MIN_TRAINING_TIME, Individual::MAX_TRAINING_TIME));
+  individual.set_learning_rate(get_random(Individual::MIN_LEARNING_RATE, Individual::MAX_LEARNING_RATE));
+  individual.set_momentum(get_random(Individual::MIN_MOMENTUM, Individual::MAX_MOMENTUM));
   assert(individual.is_valid_individual());
   return individual;
 }

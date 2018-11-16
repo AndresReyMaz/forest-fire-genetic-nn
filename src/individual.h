@@ -7,6 +7,8 @@
 #include <utility>
 #include <vector>
 
+#include "random_util.h"
+
 const int N_BITS = 57;
 
 class Individual {
