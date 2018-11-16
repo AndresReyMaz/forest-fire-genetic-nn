@@ -1,5 +1,8 @@
 #include <assert.h>
 #include <bitset>
+#include <random>
+#include <unordered_set>
+#include <vector>
 
 #include "individual.h"
 
@@ -63,4 +66,30 @@ void Individual::mutate() {
       bit_vector[random_bit] = !bit_vector[random_bit];
     }
   }
+}
+
+Individual Individual::generate_random_individual() {
+  Individual individual = Individual();
+  int number_of_hidden_layers = Individual::get_random(Individual::MIN_HIDDEN_LAYERS, Individual::MAX_HIDDEN_LAYERS);
+  individual.set_number_of_layers(number_of_hidden_layers);
+  for (int i = 1; i <= number_of_hidden_layers; ++i) {
+    individual.set_neurons_for_layer(i, Individual::get_random(Individual::MIN_NUMBER_NEURONS, Individual::MAX_NUMBER_NEURONS));
+  }
+  individual.set_training_time(Individual::get_random(Individual::MIN_TRAINING_TIME, Individual::MAX_TRAINING_TIME));
+  individual.set_learning_rate(Individual::get_random(Individual::MIN_LEARNING_RATE, Individual::MAX_LEARNING_RATE));
+  individual.set_momentum(Individual::get_random(Individual::MIN_MOMENTUM, Individual::MAX_MOMENTUM));
+  assert(individual.is_valid_individual());
+  return individual;
+}
+
+std::vector<Individual> Individual::generate_random_population(unsigned size) {
+  std::vector<Individual> population;
+  std::unordered_set<std::bitset<Individual::MOMENTUM_END + 1>> hash_set;
+  while (population.size() != size) {
+    Individual new_individual = generate_random_individual();
+    if (hash_set.find(new_individual.get_vector()) == hash_set.end()) {
+      population.push_back(new_individual);
+    }
+  }
+  return population;
 }

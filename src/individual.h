@@ -5,6 +5,7 @@
 #include <bitset>
 #include <random>
 #include <utility>
+#include <vector>
 
 const int N_BITS = 57;
 
@@ -120,6 +121,12 @@ class Individual {
   // Mutates the individual by one bit to a valid representation.
   void mutate();
   
+  // Randomly generates an individual.
+  static Individual generate_random_individual();
+
+  // Randomly generates a population of a given size.
+  static std::vector<Individual> generate_random_population(unsigned size);
+
   Individual() { };
   
   Individual(const Individual &other) {
@@ -142,17 +149,13 @@ class Individual {
   
  private:
   std::bitset<N_BITS> bit_vector;
-  std::default_random_engine eng {std::random_device{}()};
+  static std::default_random_engine eng;
 
   int to_value(int start, int end) const;
 
   void set_value(int start, int end, int value);
 
-  int get_random(int lo, int hi) {
-    // Gets a random value between lo and hi, inclusive.
-    std::uniform_int_distribution<> dist {lo, hi};
-    return dist(eng);
-  }
+  
 
 };
 
