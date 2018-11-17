@@ -5,7 +5,7 @@
 
 #include "individual.h"
 
-/* Generates the necessary number of children to reach the desired population size. */
-void generate_children(std::vector<Individual>& population, int desired_population_size);
+// Generate children for the population by randomly selecting parents.
+void generate_children(std::vector<Individual>& population);
 
 #endif

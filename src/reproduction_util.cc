@@ -1,9 +1,13 @@
+#include "reproduction_util.h"
+
+#include <algorithm>
+#include <bitset>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
 #include "individual.h"
 #include "random_util.h"
-#include "reproduction_util.h"
 
 Individual training_time_swap(const Individual& parent1, const Individual& parent2) {
   Individual child = Individual(parent1);
@@ -87,15 +91,77 @@ Individual crossover(int crossover_operator, const Individual& parent1, const In
   case 2: return learning_rate_swap(parent1, parent2);
   case 3: return momentum_swap(parent1, parent2);
   case 4: return neurons_swap(parent1, parent2);
+  case 5: return layer_crossover(parent1, parent2);
+  case 6: return training_time_swap(parent2, parent1);
+  case 7: return learning_rate_swap(parent2, parent1);
+  case 8: return momentum_swap(parent2, parent1);
+  case 9: return neurons_swap(parent2, parent1);
+  case 10: return layer_crossover(parent2, parent1);
   default: return neurons_swap(parent1, parent2);
   }
 }
 
 
-void generate_children(std::vector<Individual>& population, int desired_population_size) {
-  desired_population_size++;
-  std::pair<int, int> range = population[0].get_momentum_crossover_point();
-  Individual a = population[0];
-  Individual b = Individual(a);
-  b.copy_bits_from(population[1], range);
+void generate_children(std::vector<Individual>& population) {
+  // Randomly generate parent indices.
+  std::vector<int> parent_indices = get_randoms_unique(20, 0, population.size() - 1);
+
+  // Fast hashset for individuals.
+  std::unordered_set<std::bitset<57>> hash_set;
+  for (auto individual : population) {
+    hash_set.insert(individual.get_vector());
+  }
+  
+  // Index(i) produces children with Index(i+1).
+  for (unsigned i = 0; i < parent_indices.size(); i += 2) {
+    const Individual& parent1 = population[parent_indices[i]];
+    const Individual& parent2 = population[parent_indices[i+1]];
+    for (int oper = 1; oper <= 10; i++) {
+      Individual child = crossover(oper, parent1, parent2);
+      if (!child.is_valid_individual())
+        continue;
+      // Add to population if it is not a clone.
+      if (hash_set.find(child.get_vector()) == hash_set.end()) {
+        hash_set.insert(child.get_vector());
+        population.push_back(child);
+      }
+    }
+    // Crossover point operators.
+    std::pair<int, int> range = population[parent_indices[i]].get_momentum_crossover_point();
+    Individual child = Individual(parent1);
+    child.copy_bits_from(parent2, range);
+    if (child.is_valid_individual() and hash_set.find(child.get_vector()) == hash_set.end()) {
+      hash_set.insert(child.get_vector());
+      population.push_back(child);
+    }
+
+    range = population[parent_indices[i]].get_learning_rate_crossover_point();
+    child = Individual(parent1);
+    child.copy_bits_from(parent2, range);
+    if (child.is_valid_individual() and hash_set.find(child.get_vector()) == hash_set.end()) {
+      hash_set.insert(child.get_vector());
+      population.push_back(child);
+    }
+
+    range = population[parent_indices[i]].get_training_time_crossover_point();
+    child = Individual(parent1);
+    child.copy_bits_from(parent2, range);
+    if (child.is_valid_individual() and hash_set.find(child.get_vector()) == hash_set.end()) {
+      hash_set.insert(child.get_vector());
+      population.push_back(child);
+    }
+
+    // Random neuron selection.
+    // Larger of the two.
+    std::pair<Individual, Individual> children = random_neuron_selection(parent1, parent2,
+                                                                         std::max(parent1.get_neurons(), parent2.get_neurons()));
+    if (children.first.is_valid_individual() and hash_set.find(children.first.get_vector()) == hash_set.end()) {
+      hash_set.insert(children.first.get_vector());
+      population.push_back(children.first);
+    }
+    if (children.second.is_valid_individual() and hash_set.find(children.second.get_vector()) == hash_set.end()) {
+      hash_set.insert(children.second.get_vector());
+      population.push_back(children.second);
+    }
+  }
 }
