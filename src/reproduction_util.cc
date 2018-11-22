@@ -36,13 +36,13 @@ Individual neurons_swap(const Individual& parent1, const Individual& parent2) {
 std::pair<Individual, Individual> random_neuron_selection(const Individual& parent1, const Individual& parent2, int number_of_layers) {
   int total_layers = parent1.get_hidden_layers() + parent2.get_hidden_layers();
   // Select |number_of_layers| random layers.
-  std::vector<int> random_layers = get_randoms(number_of_layers, 0, total_layers - 1);
+  std::vector<int> random_layers = get_randoms(number_of_layers, 1, total_layers);
   // Create copy of parent1.
   Individual child1 = Individual(parent1);
   // Get the number of neurons of each of the randomly chosen layers.
   std::vector<int> number_of_neurons_for_layer;
   for (auto layer : random_layers) {
-    if (layer < parent1.get_hidden_layers()) {
+    if (layer <= parent1.get_hidden_layers()) {
       // Use parent 1
       number_of_neurons_for_layer.push_back(parent1.get_neurons_for_layer(layer));
     } else {
@@ -72,7 +72,7 @@ Individual layer_crossover(const Individual& parent1, const Individual& parent2)
 
   // Make copy of parent1.
   Individual child = Individual(parent1);
-  
+
   // Select a random crossover point.
   int point = get_random(1, Individual::NUMBER_NEURONS_LENGTH);
   // Assign values [point, NUMBER_NEURONS_LENGTH] of second parent to first parent.
@@ -111,12 +111,14 @@ void generate_children(std::vector<Individual>& population) {
   for (auto individual : population) {
     hash_set.insert(individual.get_vector());
   }
-  
+
   // Index(i) produces children with Index(i+1).
   for (unsigned i = 0; i < parent_indices.size(); i += 2) {
     const Individual& parent1 = population[parent_indices[i]];
     const Individual& parent2 = population[parent_indices[i+1]];
-    for (int oper = 1; oper <= 10; i++) {
+    for (int oper = 1; oper <= 10; oper++) {
+      if ((oper == 5 or oper == 10) and (parent1.get_hidden_layers() == 0 or parent2.get_hidden_layers() == 0))
+        continue;
       Individual child = crossover(oper, parent1, parent2);
       if (!child.is_valid_individual())
         continue;
@@ -126,6 +128,8 @@ void generate_children(std::vector<Individual>& population) {
         population.push_back(child);
       }
     }
+
+
     // Crossover point operators.
     std::pair<int, int> range = population[parent_indices[i]].get_momentum_crossover_point();
     Individual child = Individual(parent1);
@@ -152,9 +156,12 @@ void generate_children(std::vector<Individual>& population) {
     }
 
     // Random neuron selection.
+    // If either of the parents has no hidden layers, then skip.
+    if (parent1.get_hidden_layers() == 0 or parent2.get_hidden_layers() == 0)
+      continue;
     // Larger of the two.
     std::pair<Individual, Individual> children = random_neuron_selection(parent1, parent2,
-                                                                         std::max(parent1.get_neurons(), parent2.get_neurons()));
+                                                                         std::max(parent1.get_hidden_layers(), parent2.get_hidden_layers()));
     if (children.first.is_valid_individual() and hash_set.find(children.first.get_vector()) == hash_set.end()) {
       hash_set.insert(children.first.get_vector());
       population.push_back(children.first);
