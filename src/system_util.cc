@@ -16,13 +16,16 @@ int get_global_precision(const std::vector<int>& layers, int training_time, int 
   double L = ((double) learning_rate) / 10000.0;
   double M = ((double) momentum) / 10000.0;
   std::string H = "\"";
-  for (unsigned i = 0; i < layers.size(); ++i) {
-    H += std::to_string(layers[i]);
-    if (i != layers.size() - 1)
-      H += ", ";
-    else H += "\"";
+  if (layers.size() == 0) {
+    H += "\"";
+  } else {
+    for (unsigned i = 0; i < layers.size(); ++i) {
+      H += std::to_string(layers[i]);
+      if (i != layers.size() - 1)
+        H += ", ";
+      else H += "\"";
+    }
   }
-  
   // Runs the neural network using Weka and parses the result.
   std::array<char, 128> buffer;
   // The output of the process.
