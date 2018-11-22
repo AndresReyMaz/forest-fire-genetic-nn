@@ -6,8 +6,19 @@
 
 #include "individual.h"
 #include "random_util.h"
+#include "system_util.h"
 
+const int Individual::LEARNING_RATE_END;
+const int Individual::TRAINING_TIME_END;
 const int Individual::MOMENTUM_END; // circumvents strange linker error
+
+void Individual::evaluate() {
+  if (precision == 0)
+    precision = get_global_precision(get_hidden_layer_values(),
+                                     get_training_time(),
+                                     get_learning_rate(),
+                                     get_momentum());
+}
 
 int Individual::to_value(int start, int end) const {
   // Returns the numeric value represented by a subsequence of bits.

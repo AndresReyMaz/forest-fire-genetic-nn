@@ -33,7 +33,7 @@ class Individual {
   }
 
   int get_neurons_for_layer(int layer) const {
-    assert(layer <= get_hidden_layers());
+    //assert(layer <= get_hidden_layers());
     return to_value(NUMBER_NEURONS_START + NUMBER_NEURONS_LENGTH * (layer - 1),
 		    NUMBER_NEURONS_START + NUMBER_NEURONS_LENGTH * layer - 1) + MIN_NUMBER_NEURONS;
   }
@@ -66,7 +66,18 @@ class Individual {
   std::pair<int, int> get_momentum_crossover_point() {
     return {get_random(MOMENTUM_START + 1, MOMENTUM_END), MOMENTUM_END};
   }
-  
+
+  std::vector<int> get_hidden_layer_values() {
+    int layers = get_hidden_layers();
+    std::vector<int> values;
+    for (int i = 1 ; i <= layers; ++i) {
+      values.push_back(get_neurons_for_layer(i));
+    }
+    return values;
+  }
+
+  int get_precision() { return precision; }
+
   void set_training_time(int training_time);
   void set_learning_rate(int learning_rate);
   void set_momentum(int momentum);
@@ -78,7 +89,7 @@ class Individual {
 
   // Sets the 0-indexed layer to value.
   void set_hidden_layer(int layer, int value);
-  
+
   // Sets the number of hidden layers to the length of the list and the values to those selected.
   void set_neurons(const std::vector<int>& neurons);
 
@@ -122,18 +133,27 @@ class Individual {
 
   // Mutates the individual by one bit to a valid representation.
   void mutate();
-  
+
   // Randomly generates an individual.
   static Individual generate_random_individual();
 
   // Randomly generates a population of a given size.
   static std::vector<Individual> generate_random_population(unsigned size);
 
-  Individual() { };
-  
+  // Runs the neural network parameters agains the Weka algorithm.
+  void evaluate();
+
+  Individual() : precision(0) { };
+
   Individual(const Individual &other) {
     bit_vector = std::bitset<N_BITS>(other.get_vector().to_ullong());
+    precision = 0;
   }
+
+  bool operator < (const Individual& other) const {
+    return (precision > other.precision);
+  }
+
   static const int HIDDEN_LAYERS_START = 0;
   static const int HIDDEN_LAYERS_END = HIDDEN_LAYERS_START + 1;
   static const int NUMBER_NEURONS_START = HIDDEN_LAYERS_END + 1;
@@ -148,16 +168,16 @@ class Individual {
   static const int MOMENTUM_START = LEARNING_RATE_END + 1;
   static const int MOMENTUM_LENGTH = 13;
   static const int MOMENTUM_END = MOMENTUM_START + MOMENTUM_LENGTH - 1;
-  
+
  private:
   std::bitset<N_BITS> bit_vector;
-  static std::default_random_engine eng;
+
+  // The global precision of the neural network defined by the individual.
+  int precision;
 
   int to_value(int start, int end) const;
 
   void set_value(int start, int end, int value);
-
-  
 
 };
 
