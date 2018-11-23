@@ -39,7 +39,7 @@ void genetic_algorithm(int population_size) {
     // Print out values.
     for (Individual individual : population) {
       std::cout << "  " << individual.get_precision() << std::endl;
-      std::cout << individual.get_hidden_layers << " ";
+      std::cout << individual.get_hidden_layers() << " ";
       std::vector<int> layers = individual.get_hidden_layer_values();
       for (int layer : layers)
         std::cout << layer << " ";
