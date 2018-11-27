@@ -31,7 +31,7 @@ int get_global_precision(const std::vector<int>& layers, int training_time, int 
   // The output of the process.
   std::string result;
   std::stringstream ss;
-  ss << "java weka.classifiers.functions.MultilayerPerceptron -t ~/code/ForestFireDetector/forestfiresfinal.arff";
+  ss << "java weka.classifiers.functions.MultilayerPerceptron -t ~/code/ForestFireDetector/forestfiresfinal1000.arff";
   ss << " -L " << L;
   ss << " -N " << N;
   ss << " -M " << M;
