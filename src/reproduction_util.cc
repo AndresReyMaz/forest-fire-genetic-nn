@@ -9,6 +9,8 @@
 #include "individual.h"
 #include "random_util.h"
 
+const int PARENTS_TO_CHOOSE = 8;
+
 Individual training_time_swap(const Individual& parent1, const Individual& parent2) {
   Individual child = Individual(parent1);
   child.set_training_time(parent2.get_training_time());
@@ -92,32 +94,29 @@ Individual crossover(int crossover_operator, const Individual& parent1, const In
   case 3: return momentum_swap(parent1, parent2);
   case 4: return neurons_swap(parent1, parent2);
   case 5: return layer_crossover(parent1, parent2);
-  case 6: return training_time_swap(parent2, parent1);
-  case 7: return learning_rate_swap(parent2, parent1);
-  case 8: return momentum_swap(parent2, parent1);
-  case 9: return neurons_swap(parent2, parent1);
-  case 10: return layer_crossover(parent2, parent1);
   default: return neurons_swap(parent1, parent2);
   }
 }
 
 
-void generate_children(std::vector<Individual>& population) {
-  // Randomly generate parent indices.
-  std::vector<int> parent_indices = get_randoms_unique(20, 0, population.size() - 1);
+void generate_children(std::vector<Individual>& population, unsigned desired_population_size) {
+  // Randomly generate parent indices. There will be 8 randomly chosen parents.
+  std::vector<int> parent_indices = get_randoms_unique(PARENTS_TO_CHOOSE, 0, population.size() - 1);
 
   // Fast hashset for individuals.
-  std::unordered_set<std::bitset<57>> hash_set;
+  std::unordered_set<std::bitset<N_BITS>> hash_set;
   for (auto individual : population) {
     hash_set.insert(individual.get_vector());
   }
 
+  // Number of simple swap operators there are.
+  int number_of_operators = 5;
   // Index(i) produces children with Index(i+1).
   for (unsigned i = 0; i < parent_indices.size(); i += 2) {
     const Individual& parent1 = population[parent_indices[i]];
     const Individual& parent2 = population[parent_indices[i+1]];
-    for (int oper = 1; oper <= 10; oper++) {
-      if ((oper == 5 or oper == 10) and (parent1.get_hidden_layers() == 0 or parent2.get_hidden_layers() == 0))
+    for (int oper = 1; oper <= number_of_operators; oper++) {
+      if ((oper == number_of_operators) and (parent1.get_hidden_layers() == 0 or parent2.get_hidden_layers() == 0))
         continue;
       Individual child = crossover(oper, parent1, parent2);
       if (!child.is_valid_individual())
@@ -127,6 +126,7 @@ void generate_children(std::vector<Individual>& population) {
         hash_set.insert(child.get_vector());
         population.push_back(child);
       }
+      if (population.size() == desired_population_size) return;
     }
 
 
@@ -138,6 +138,7 @@ void generate_children(std::vector<Individual>& population) {
       hash_set.insert(child.get_vector());
       population.push_back(child);
     }
+    if (population.size() == desired_population_size) return;
 
     range = population[parent_indices[i]].get_learning_rate_crossover_point();
     child = Individual(parent1);
@@ -146,6 +147,7 @@ void generate_children(std::vector<Individual>& population) {
       hash_set.insert(child.get_vector());
       population.push_back(child);
     }
+    if (population.size() == desired_population_size) return;
 
     range = population[parent_indices[i]].get_training_time_crossover_point();
     child = Individual(parent1);
@@ -154,6 +156,7 @@ void generate_children(std::vector<Individual>& population) {
       hash_set.insert(child.get_vector());
       population.push_back(child);
     }
+    if (population.size() == desired_population_size) return;
 
     // Random neuron selection.
     // If either of the parents has no hidden layers, then skip.
@@ -166,9 +169,11 @@ void generate_children(std::vector<Individual>& population) {
       hash_set.insert(children.first.get_vector());
       population.push_back(children.first);
     }
+    if (population.size() == desired_population_size) return;
     if (children.second.is_valid_individual() and hash_set.find(children.second.get_vector()) == hash_set.end()) {
       hash_set.insert(children.second.get_vector());
       population.push_back(children.second);
     }
+    if (population.size() == desired_population_size) return;
   }
 }
