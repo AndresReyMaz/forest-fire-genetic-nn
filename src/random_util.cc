@@ -12,7 +12,6 @@ int get_random(int lo, int hi) {
 }
 
 std::vector<int> get_randoms(int n, int lo, int hi) {
-  // Gets n random values between lo and hi, inclusive.
   std::default_random_engine eng {std::random_device{}()};
   std::uniform_int_distribution<> dist {lo, hi};
   std::vector<int> v;
