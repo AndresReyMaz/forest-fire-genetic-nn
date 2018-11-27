@@ -8,21 +8,21 @@
 #include <vector>
 
 #include "random_util.h"
-
-const int N_BITS = 57;
+const int N_BITS = 48;
+const int POPULATION_SIZE = 20;
 
 class Individual {
  public:
   static const int MIN_HIDDEN_LAYERS = 0;
   static const int MAX_HIDDEN_LAYERS = 3;
-  static const int MIN_NUMBER_NEURONS = 3;
-  static const int MAX_NUMBER_NEURONS = 100;
+  static const int MIN_NUMBER_NEURONS = 1;
+  static const int MAX_NUMBER_NEURONS = 19;
   static const int MIN_TRAINING_TIME = 0;
-  static const int MAX_TRAINING_TIME = 195;
+  static const int MAX_TRAINING_TIME = 45;
   static const int MIN_LEARNING_RATE = 1000;
   static const int MAX_LEARNING_RATE = 6000;
   static const int MIN_MOMENTUM = 1000;
-  static const int MAX_MOMENTUM = 7000;
+  static const int MAX_MOMENTUM = 5000;
 
   std::bitset<N_BITS> get_vector() const {
     return bit_vector;
@@ -76,7 +76,9 @@ class Individual {
     return values;
   }
 
-  int get_precision() { return precision; }
+  int get_precision() {
+    return precision;
+  }
 
   void set_training_time(int training_time);
   void set_learning_rate(int learning_rate);
@@ -92,6 +94,10 @@ class Individual {
 
   // Sets the number of hidden layers to the length of the list and the values to those selected.
   void set_neurons(const std::vector<int>& neurons);
+
+  void set_precision(int prec) {
+    precision = prec;
+  }
 
   void copy_bits_from(const Individual& other, const std::pair<int, int>& range) {
     // Copies the bits in the range from other to this.
@@ -110,7 +116,7 @@ class Individual {
 
   bool is_valid_individual() {
     // Checks if the individual has valid values for all parameters.
-    for (int i = 1; i <= 3; ++i) {
+    for (int i = 1; i <= MAX_HIDDEN_LAYERS; ++i) {
       int number_of_neurons = get_neurons_for_layer(i);
       if (number_of_neurons < MIN_NUMBER_NEURONS or number_of_neurons > MAX_NUMBER_NEURONS) {
 	return false;
@@ -157,16 +163,16 @@ class Individual {
   static const int HIDDEN_LAYERS_START = 0;
   static const int HIDDEN_LAYERS_END = HIDDEN_LAYERS_START + 1;
   static const int NUMBER_NEURONS_START = HIDDEN_LAYERS_END + 1;
-  static const int NUMBER_NEURONS_LENGTH = 7;
+  static const int NUMBER_NEURONS_LENGTH = 5;
   static const int NUMBER_NEURONS_END = NUMBER_NEURONS_START + NUMBER_NEURONS_LENGTH * MAX_HIDDEN_LAYERS - 1;
   static const int TRAINING_TIME_START = NUMBER_NEURONS_END + 1;
-  static const int TRAINING_TIME_LENGTH = 8;
+  static const int TRAINING_TIME_LENGTH = 6;
   static const int TRAINING_TIME_END = TRAINING_TIME_START + TRAINING_TIME_LENGTH - 1;
   static const int LEARNING_RATE_START = TRAINING_TIME_END + 1;
   static const int LEARNING_RATE_LENGTH = 13;
   static const int LEARNING_RATE_END = LEARNING_RATE_START + LEARNING_RATE_LENGTH - 1;
   static const int MOMENTUM_START = LEARNING_RATE_END + 1;
-  static const int MOMENTUM_LENGTH = 13;
+  static const int MOMENTUM_LENGTH = 12;
   static const int MOMENTUM_END = MOMENTUM_START + MOMENTUM_LENGTH - 1;
 
  private:

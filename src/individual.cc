@@ -1,10 +1,11 @@
+#include "individual.h"
+
 #include <assert.h>
 #include <bitset>
 #include <random>
 #include <unordered_set>
 #include <vector>
 
-#include "individual.h"
 #include "random_util.h"
 #include "system_util.h"
 
